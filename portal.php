@@ -16,6 +16,13 @@ if(isset($_POST['accept_terms'])){
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
+  <header class="brand-header">
+    <img src="./assets/img/gesex-logo.jpg" alt="GESEX" class="brand-logo">
+    <div class="brand-copy">
+      <h1>GESEX</h1>
+      <p>Smart Fruit for Good</p>
+    </div>
+  </header>
   <div class="container mt-5">
     <div class="row justify-content-center">
       <div class="col-md-8">
@@ -25,17 +32,17 @@ if(isset($_POST['accept_terms'])){
           </div>
           <div class="card-body">
             <p>Por favor, lea atentamente los siguientes términos y condiciones antes de acceder a la red WiFi de visitas.</p>
-            <h5>1. Aceptación de Términos</h5>
+            <h5>1. Aceptación de términos</h5>
             <p>Al aceptar estos términos, usted acuerda cumplir con las políticas de uso de la red.</p>
-            <h5>2. Uso Responsable</h5>
+            <h5>2. Uso responsable</h5>
             <p>El acceso a la red es únicamente para fines legítimos. No se permite el uso para actividades ilegales.</p>
             <h5>3. Privacidad</h5>
-            <p>Su email será utilizado solo para enviar el código OTP y no será almacenado permanentemente.</p>
+            <p>Su correo electrónico será utilizado solo para enviar el código OTP y no será almacenado permanentemente.</p>
             <h5>4. Responsabilidad</h5>
             <p>La organización no se hace responsable por el uso indebido de la red.</p>
             <p>Si acepta estos términos, haga clic en "Aceptar" para continuar.</p>
             <form method="POST">
-              <button type="submit" name="accept_terms" class="btn btn-primary">Aceptar Términos y Continuar</button>
+              <button type="submit" name="accept_terms" class="btn btn-primary">Aceptar términos y continuar</button>
             </form>
           </div>
         </div>

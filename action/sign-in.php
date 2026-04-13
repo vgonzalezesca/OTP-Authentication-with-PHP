@@ -30,8 +30,8 @@ if(isset($_POST["signin"])){
 
         // echo "Created Account!";
         // header('Location: ../index.php');
-    }catch(PDOException $e){
-            echo "Your error is : " . $e->getMessage();
+    } catch(PDOException $e) {
+            echo "Error al iniciar sesión: " . $e->getMessage();
     }
 
 }
