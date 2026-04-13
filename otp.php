@@ -3,6 +3,10 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 session_start();
+if(!isset($_SESSION['terms_accepted'])){
+    header('Location: portal.php');
+    exit;
+}
 $msg = "";
 $otpSent = false;
 
@@ -27,27 +31,27 @@ if(isset($_POST['send-email'])){
     $stmt->execute();
     $stmt->close();
 
-    require 'vendor/autoload.php';
+    require 'config/smtp.php';
     $mail = new PHPMailer(true);
 
     try {
         $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com'; 
+        $mail->Host       = SMTP_HOST; 
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'your-email@gmail.com';
-        $mail->Password   = 'your-app-password';
-        $mail->SMTPSecure = 'tls'; 
-        $mail->Port       = 587;
+        $mail->Username   = SMTP_USERNAME;
+        $mail->Password   = SMTP_PASSWORD;
+        $mail->SMTPSecure = SMTP_SECURE; 
+        $mail->Port       = SMTP_PORT;
 
-        $mail->setFrom('your-email@gmail.com', 'YourApp');
+        $mail->setFrom(FROM_EMAIL, FROM_NAME);
         $mail->addAddress($email);
 
         $mail->isHTML(true);
-        $mail->Subject = 'کد تایید شما';
-        $mail->Body    = "کد تایید شما: <b>$otp</b>";
+        $mail->Subject = 'Código de verificación OTP';
+        $mail->Body    = "Su código de verificación es: <b>$otp</b>";
 
         $mail->send();
-        $msg = "✅ OTP به ایمیل شما ارسال شد و در دیتابیس ذخیره گردید.";
+        $msg = "✅ OTP enviado a su email.";
         $otpSent = true;
     } catch (Exception $e) {
         $msg = "❌ خطا در ارسال ایمیل: {$mail->ErrorInfo}";
@@ -70,36 +74,38 @@ if(isset($_POST['verify-otp'])){
     $stmt->close();
 
     if($dbOtp && $enteredOtp == $dbOtp){
-        $msg = "✅ OTP صحیح است. ورود موفق بود.";
+        $msg = "✅ OTP correcto. Acceso concedido.";
+        header('Location: success.php');
+        exit;
     } else {
-        $msg = "❌ OTP اشتباه است.";
+        $msg = "❌ OTP incorrecto.";
     }
 }
 ?>
 
-<html lang="fa">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>OTP</title>
+  <title>OTP - Portal de Visitas</title>
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
   <div class="container" id="container">
     <div class="form-container sign-in">
-      <h1>OTP</h1>
+      <h1>Autenticación OTP</h1>
       <br>
 
       <?php if($msg) echo "<p style='color:blue;'>$msg</p>"; ?>
 
       <?php if(!$otpSent){ ?>
         <form method="POST">
-          <input type="email" name="email" placeholder="Enter your Email" required>
-          <button type='submit' name="send-email">Send To Email</button>
+          <input type="email" name="email" placeholder="Ingrese su Email" required>
+          <button type='submit' name="send-email">Enviar OTP</button>
         </form>
       <?php } else { ?>
         <form method="POST">
-          <input type="text" name="otp" placeholder="Enter OTP" required>
-          <button type='submit' name="verify-otp">Check OTP</button>
+          <input type="text" name="otp" placeholder="Ingrese OTP" required>
+          <button type='submit' name="verify-otp">Verificar OTP</button>
         </form>
       <?php } ?>
     </div>
