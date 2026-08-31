@@ -25,7 +25,7 @@ unset($_SESSION['otp_email']);
       <p>Se abrirá la página de Fortigate en 5 segundos.</p>
       <script>
         setTimeout(function(){
-          window.location.href = 'http://192.168.201.1/?res=success';
+          window.location.href = <?php echo json_encode(getenv('GESEX_SUCCESS_URL') ?: 'http://192.168.201.1/?res=success'); ?>;
         }, 5000);
       </script>
     </div>
