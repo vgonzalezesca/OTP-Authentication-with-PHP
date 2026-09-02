@@ -380,3 +380,24 @@ body {
 .message-container button.primary { padding: .7em 1.2em; border: 1px solid transparent; border-radius: 10px; min-width: 8em; font-weight: 600; font-size: .95em; cursor: pointer; color: #fff; background: linear-gradient(135deg, #1b5f8f, #2f8f6b); box-shadow: 0 10px 20px rgba(27,95,143,.2); }
 .text-centered { text-align: center; }
 @media (max-width: 520px) { .message-container { padding: 20px 18px; } .message-container .logo { height: 70px; } .field { grid-template-columns: 1fr; } }
+
+.success-page { min-height: 100vh; }
+.success-container { align-items: center; padding: 42px 30px; }
+.success-icon { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: #2f8f6b; color: #fff; font-size: 2.25rem; font-weight: 700; box-shadow: 0 12px 24px rgba(47,143,107,.25); }
+.success-container h1 { font-size: clamp(1.7rem, 5vw, 2.2rem); }
+.progress-track { width: min(420px, 100%); height: 10px; overflow: hidden; border-radius: 999px; background: #e4ece7; }
+.progress-bar { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #1b5f8f, #2f8f6b); transition: width .05s linear; }
+
+.report-page { min-height: 100vh; padding: 30px 16px; background: #f3f7f4; color: #1f2a2e; }
+.report-container { width: min(1080px, 100%); padding: 28px; border-radius: 18px; background: #fff; box-shadow: 0 18px 45px rgba(17,42,36,.14); }
+.report-container h1 { color: #1b5f8f; margin-bottom: 8px; }
+.report-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; margin: 24px 0 16px; }
+.report-filters label { display: grid; gap: 6px; font-weight: 600; }
+.report-filters input { min-height: 40px; padding: 8px 10px; border: 1px solid #c9d8d2; border-radius: 8px; font: inherit; }
+.report-filters button, .report-link { min-height: 40px; padding: 10px 14px; border: 0; border-radius: 8px; color: #fff; background: #1b5f8f; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+.report-link { background: #2f8f6b; }
+.report-count { margin-bottom: 12px; color: #5f6f76; }
+.report-table-wrap { overflow-x: auto; }
+.report-container table { width: 100%; border-collapse: collapse; }
+.report-container th, .report-container td { padding: 12px; border-bottom: 1px solid #e3ebe7; text-align: left; }
+.report-container th { color: #1b5f8f; background: #f6faf8; }
