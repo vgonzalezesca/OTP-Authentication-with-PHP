@@ -5,6 +5,8 @@ use PHPMailer\PHPMailer\Exception;
 session_start();
 require_once 'config/loader.php';
 require_once 'config/smtp.php';
+require_once 'config/fortigate.php';
+gesexCaptureFortiGateContext();
 if (!isset($_SESSION['terms_accepted'])) {
     header('Location: portal.php');
     exit;
@@ -101,6 +103,7 @@ if (isset($_POST['verify-otp']) && $databaseAvailable) {
             );
             $clearOtp->execute([':email' => $email]);
             $_SESSION['otp_email'] = $email;
+            $_SESSION['otp_verified'] = true;
             header('Location: success.php');
             exit;
         }

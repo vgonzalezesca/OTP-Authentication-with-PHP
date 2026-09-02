@@ -1,6 +1,10 @@
 <?php
 session_start();
+require_once 'config/fortigate.php';
+gesexCaptureFortiGateContext();
+
 if (isset($_POST['accept_terms'])) {
+    session_regenerate_id(true);
     $_SESSION['terms_accepted'] = true;
     header('Location: otp.php');
     exit;

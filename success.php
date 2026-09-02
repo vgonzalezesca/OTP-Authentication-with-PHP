@@ -1,7 +1,15 @@
 <?php
 session_start();
 require_once 'config/loader.php';
+require_once 'config/fortigate.php';
+
+if (empty($_SESSION['otp_verified'])) {
+    header('Location: portal.php');
+    exit;
+}
+
 $email = strtolower(trim($_SESSION['otp_email'] ?? ''));
+$fortiGateHandoff = gesexFortiGateHandoff();
 
 if ($email !== '' && $conn instanceof PDO) {
     try {
@@ -19,6 +27,9 @@ unset($_SESSION['terms_accepted']);
 unset($_SESSION['otp_email']);
 unset($_SESSION['otp_hash']);
 unset($_SESSION['otp_expires_at']);
+unset($_SESSION['otp_verified']);
+unset($_SESSION['fortigate_magic']);
+unset($_SESSION['fortigate_context']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -31,33 +42,26 @@ unset($_SESSION['otp_expires_at']);
 <body class="captive-page success-page">
   <main class="message-container success-container">
     <div class="success-icon" aria-hidden="true">✓</div>
-    <h1 class="text-centered">Acceso concedido</h1>
-    <p class="subtitle text-centered">Ha sido autenticado exitosamente. Ahora puede navegar.</p>
-    <p class="text-centered">Redirigiendo a FortiGate en <strong id="countdown">5</strong> segundos…</p>
-    <div class="progress-track" role="progressbar" aria-label="Redirección en curso" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
+    <?php if ($fortiGateHandoff['fortigate_flow'] && $fortiGateHandoff['valid']): ?>
+      <h1 class="text-centered">Autenticando su conexion</h1>
+      <p class="subtitle text-centered">El codigo OTP fue validado. Espere mientras se autoriza el acceso en el gateway.</p>
+      <p class="text-centered">Conectando con la puerta de enlace Wi-Fi…</p>
+      <form id="fortigate-auth-form" method="post" action="<?php echo htmlspecialchars($fortiGateHandoff['action'], ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="magic" value="<?php echo htmlspecialchars($fortiGateHandoff['magic'], ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="username" value="<?php echo htmlspecialchars($fortiGateHandoff['username'], ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="password" value="<?php echo htmlspecialchars($fortiGateHandoff['password'], ENT_QUOTES, 'UTF-8'); ?>">
+        <noscript><button class="primary" type="submit">Continuar a Internet</button></noscript>
+      </form>
+      <script>
+        document.getElementById('fortigate-auth-form').submit();
+      </script>
+    <?php elseif ($fortiGateHandoff['fortigate_flow']): ?>
+      <h1 class="text-centered">No fue posible autorizar la conexion</h1>
+      <p class="note" role="alert"><?php echo htmlspecialchars($fortiGateHandoff['error'], ENT_QUOTES, 'UTF-8'); ?></p>
+    <?php else: ?>
+      <h1 class="text-centered">OTP validado</h1>
+      <p class="subtitle text-centered">Modo de prueba local: no se recibio una sesion FortiGate para autorizar.</p>
+    <?php endif; ?>
   </main>
-  <script>
-    const targetUrl = <?php echo json_encode(getenv('GESEX_SUCCESS_URL') ?: 'http://192.168.201.1/?res=success'); ?>;
-    const duration = 5;
-    const startedAt = Date.now();
-    const countdown = document.getElementById('countdown');
-    const progressBar = document.getElementById('progress-bar');
-    const progressTrack = progressBar.parentElement;
-
-    function updateProgress() {
-      const elapsed = Math.min((Date.now() - startedAt) / 1000, duration);
-      progressBar.style.width = `${(elapsed / duration) * 100}%`;
-      progressTrack.setAttribute('aria-valuenow', String(Math.floor(elapsed)));
-      countdown.textContent = String(Math.max(0, Math.ceil(duration - elapsed)));
-      if (elapsed < duration) {
-        requestAnimationFrame(updateProgress);
-      } else {
-        window.location.assign(targetUrl);
-      }
-    }
-    requestAnimationFrame(updateProgress);
-  </script>
 </body>
 </html>

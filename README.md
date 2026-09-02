@@ -113,7 +113,7 @@ La aplicación queda en el puerto `8080` del servidor y Apache escucha en el pue
 
 El archivo `.env` no debe subirse al repositorio. Para una base de datos MySQL existente, usa el servicio `app` con `GESEX_DB_HOST`, `GESEX_DB_PORT`, `GESEX_DB_NAME`, `GESEX_DB_USER` y `GESEX_DB_PASSWORD`, y no levantes el servicio `mysql` incluido.
 
-Para integrar el portal con FortiGate, cambia `GESEX_SUCCESS_URL` por la URL de éxito que corresponda a tu instalación.
+Para integrar el portal con FortiGate, configura `FORTIGATE_AUTH_HOST`, `FORTIGATE_AUTH_PORT`, `FORTIGATE_AUTH_SCHEME`, `FORTIGATE_AUTH_USERNAME` y `FORTIGATE_AUTH_PASSWORD` en `.env`. Tras validar el OTP, el navegador envía el POST requerido a `/fgtauth` con el `magic` recibido de FortiGate.
 
 ---
 
