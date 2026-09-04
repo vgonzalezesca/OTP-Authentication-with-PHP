@@ -28,8 +28,6 @@ unset($_SESSION['otp_email']);
 unset($_SESSION['otp_hash']);
 unset($_SESSION['otp_expires_at']);
 unset($_SESSION['otp_verified']);
-unset($_SESSION['fortigate_magic']);
-unset($_SESSION['fortigate_context']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -37,7 +35,7 @@ unset($_SESSION['fortigate_context']);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Acceso Concedido | GESEX</title>
-  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body class="captive-page success-page">
   <main class="message-container success-container">
@@ -55,12 +53,15 @@ unset($_SESSION['fortigate_context']);
       <script>
         document.getElementById('fortigate-auth-form').submit();
       </script>
-    <?php elseif ($fortiGateHandoff['fortigate_flow']): ?>
+    <?php elseif ($fortiGateHandoff['fortigate_flow'] && $fortiGateHandoff['reason'] === 'missing_credentials'): ?>
       <h1 class="text-centered">No fue posible autorizar la conexion</h1>
       <p class="note" role="alert"><?php echo htmlspecialchars($fortiGateHandoff['error'], ENT_QUOTES, 'UTF-8'); ?></p>
+    <?php elseif ($fortiGateHandoff['fortigate_flow']): ?>
+      <h1 class="text-centered">No fue posible autorizar la conexion</h1>
+      <p class="note" role="alert">No fue posible autorizar la conexion en el gateway.</p>
     <?php else: ?>
       <h1 class="text-centered">OTP validado</h1>
-      <p class="subtitle text-centered">Modo de prueba local: no se recibio una sesion FortiGate para autorizar.</p>
+      <p class="subtitle text-centered"><?php echo htmlspecialchars($fortiGateHandoff['error'], ENT_QUOTES, 'UTF-8'); ?></p>
     <?php endif; ?>
   </main>
 </body>
