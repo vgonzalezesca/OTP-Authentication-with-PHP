@@ -11,7 +11,17 @@ if ($fortiGateAuthFailed) {
 }
 
 if (isset($_POST['accept_terms'])) {
+    $fortiGateContext = [];
+    foreach (['fortigate_magic', 'fortigate_post', 'fortigate_context'] as $key) {
+        if (array_key_exists($key, $_SESSION)) {
+            $fortiGateContext[$key] = $_SESSION[$key];
+        }
+    }
+
     session_regenerate_id(true);
+    foreach ($fortiGateContext as $key => $value) {
+        $_SESSION[$key] = $value;
+    }
     $_SESSION['terms_accepted'] = true;
     header('Location: otp.php');
     exit;

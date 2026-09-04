@@ -34,7 +34,7 @@ unset($_SESSION['otp_verified']);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Acceso Concedido | GESEX</title>
+  <title>Autenticando conexión | GESEX</title>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body class="captive-page success-page">
