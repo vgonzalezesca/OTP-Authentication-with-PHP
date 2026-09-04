@@ -17,9 +17,10 @@ function gesexCaptureFortiGateContext(string $stage = 'unknown'): void
     }
 
     if (!isset($requestContext['magic']) || !is_string($requestContext['magic'])) {
-        if (!isset($_SESSION['terms_accepted'])) {
-            unset($_SESSION['fortigate_magic'], $_SESSION['fortigate_post'], $_SESSION['fortigate_context']);
-        }
+        // Las peticiones internas del portal (aceptar términos, enviar OTP y
+        // validar OTP) normalmente no repiten los parámetros de FortiGate.
+        // Nunca borrar aquí un contexto ya capturado: magic pertenece a esta
+        // sesión cautiva y debe llegar intacto hasta success.php.
         error_log('FortiGate context received=no magic received=no stage=' . $stage);
         return;
     }
@@ -73,20 +74,24 @@ function gesexFortiGateHandoff(): array
     $username = trim((string) getenv('FORTIGATE_AUTH_USERNAME'));
     $password = (string) getenv('FORTIGATE_AUTH_PASSWORD');
 
-    $expectedPostHost = '192.168.110.1';
-    $expectedPort = 1000;
+    $expectedPostHost = trim((string) getenv('FORTIGATE_AUTH_HOST'));
+    $expectedPort = filter_var(getenv('FORTIGATE_AUTH_PORT'), FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => 1, 'max_range' => 65535],
+    ]);
+    $expectedScheme = strtolower(trim((string) getenv('FORTIGATE_AUTH_SCHEME')));
     $fortigatePost = trim((string) ($_SESSION['fortigate_post'] ?? ''));
     $endpointReceived = $fortigatePost !== '' ? 'yes' : 'no';
 
-    if ($username === '' || $password === '') {
-        error_log('FortiGate endpoint received=' . $endpointReceived . ' validated=no host='
-            . ($fortigatePost !== '' ? $expectedPostHost : '192.168.201.1')
-            . ' port=' . $expectedPort . ' path=/fgtauth stage=success');
+    if ($username === '' || $password === '' || $expectedPostHost === ''
+        || $expectedPort === false || !in_array($expectedScheme, ['http', 'https'], true)) {
+        error_log('FortiGate endpoint received=' . $endpointReceived . ' validated=no stage=success');
         return [
             'fortigate_flow' => true,
             'valid' => false,
-            'reason' => 'missing_credentials',
-            'error' => 'El portal no tiene configuradas las credenciales de autenticacion del gateway.',
+            'reason' => $username === '' || $password === '' ? 'missing_credentials' : 'invalid_config',
+            'error' => $username === '' || $password === ''
+                ? 'El portal no tiene configuradas las credenciales de autenticacion del gateway.'
+                : 'La configuracion del endpoint de FortiGate no es valida.',
         ];
     }
 
@@ -98,12 +103,12 @@ function gesexFortiGateHandoff(): array
         $postScheme = is_array($parsedPost) ? strtolower((string) ($parsedPost['scheme'] ?? '')) : '';
         $postIsValid = is_array($parsedPost)
             && in_array($postScheme, ['http', 'https'], true)
-            && $postHost === $expectedPostHost
-            && (int) ($postPort ?? $expectedPort) === $expectedPort
+            && strcasecmp((string) $postHost, $expectedPostHost) === 0
+            && $postPort === $expectedPort
             && $postPath === '/fgtauth'
             && !isset($parsedPost['user'], $parsedPost['pass'], $parsedPost['query'], $parsedPost['fragment']);
         if (!$postIsValid) {
-            error_log('FortiGate endpoint received=yes validated=no host=' . $expectedPostHost . ' port=' . $expectedPort . ' path=/fgtauth stage=success');
+            error_log('FortiGate endpoint received=yes validated=no stage=success');
             return [
                 'fortigate_flow' => true,
                 'valid' => false,
@@ -113,12 +118,14 @@ function gesexFortiGateHandoff(): array
         }
         // Se conserva exactamente el esquema y endpoint entregados por FortiGate.
         $action = $fortigatePost;
-        error_log('FortiGate endpoint received=yes validated=yes host=' . $expectedPostHost
-            . ' port=' . $expectedPort . ' path=/fgtauth stage=success');
+        error_log('FortiGate endpoint received=yes validated=yes stage=success');
     } else {
-        // Fallback fijo solo cuando existe magic pero FortiGate no envio post.
-        $action = 'https://192.168.201.1:1000/fgtauth';
-        error_log('FortiGate endpoint received=no validated=yes host=192.168.201.1 port=1000 path=/fgtauth stage=success');
+        // Fallback solo cuando existe magic pero FortiGate no envió post.
+        $urlHost = filter_var($expectedPostHost, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+            ? '[' . $expectedPostHost . ']'
+            : $expectedPostHost;
+        $action = $expectedScheme . '://' . $urlHost . ':' . $expectedPort . '/fgtauth';
+        error_log('FortiGate endpoint received=no validated=yes stage=success');
     }
 
     return [
