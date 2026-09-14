@@ -70,7 +70,7 @@ $query = http_build_query(['date' => $date, 'user' => $user, 'download' => 'csv'
 <body class="report-page">
   <main class="report-container">
     <h1>Reporte de accesos</h1>
-    <p>Conexiones autenticadas mediante OTP.</p>
+    <p>Conexiones autenticadas mediante codigo de acceso.</p>
     <form class="report-filters" method="get">
       <label>Fecha <input type="date" name="date" value="<?= h($date) ?>"></label>
       <label>Usuario o correo <input type="search" name="user" value="<?= h($user) ?>" placeholder="correo@ejemplo.com"></label>

@@ -112,7 +112,8 @@ function gesexFortiGateHandoff(): array
             && strcasecmp((string) $postHost, $expectedPostHost) === 0
             && $postPort === $expectedPort
             && $postPath === '/fgtauth'
-            && !isset($parsedPost['user'], $parsedPost['pass'], $parsedPost['query'], $parsedPost['fragment']);
+            && !isset($parsedPost['user']) && !isset($parsedPost['pass'])
+            && !isset($parsedPost['query']) && !isset($parsedPost['fragment']);
         if (!$postIsValid) {
             error_log('FortiGate endpoint received=yes validated=no scheme=' . $postScheme
                 . ' host=' . $postHost . ' port=' . ($postPort === null ? 'missing' : $postPort)

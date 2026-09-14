@@ -2,6 +2,7 @@
 session_start();
 require_once 'config/loader.php';
 require_once 'config/fortigate.php';
+require_once 'config/assets.php';
 
 if (empty($_SESSION['otp_verified'])) {
     header('Location: portal.php');
@@ -35,14 +36,14 @@ unset($_SESSION['otp_verified']);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Autenticando conexión | GESEX</title>
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <style><?php echo gesexInlineCss(); ?></style>
 </head>
 <body class="captive-page success-page">
   <main class="message-container success-container">
     <div class="success-icon" aria-hidden="true">✓</div>
     <?php if ($fortiGateHandoff['fortigate_flow'] && $fortiGateHandoff['valid']): ?>
       <h1 class="text-centered">Autenticando su conexion</h1>
-      <p class="subtitle text-centered">El codigo OTP fue validado. Espere mientras se autoriza el acceso en el gateway.</p>
+      <p class="subtitle text-centered">Su codigo fue validado. Estamos conectandolo a la red.</p>
       <p class="text-centered">Conectando con la puerta de enlace Wi-Fi…</p>
       <form id="fortigate-auth-form" method="post" action="<?php echo htmlspecialchars($fortiGateHandoff['action'], ENT_QUOTES, 'UTF-8'); ?>">
         <input type="hidden" name="magic" value="<?php echo htmlspecialchars($fortiGateHandoff['magic'], ENT_QUOTES, 'UTF-8'); ?>">
@@ -60,7 +61,7 @@ unset($_SESSION['otp_verified']);
       <h1 class="text-centered">No fue posible autorizar la conexion</h1>
       <p class="note" role="alert">No fue posible autorizar la conexion en el gateway.</p>
     <?php else: ?>
-      <h1 class="text-centered">OTP validado</h1>
+      <h1 class="text-centered">Codigo validado</h1>
       <p class="subtitle text-centered"><?php echo htmlspecialchars($fortiGateHandoff['error'], ENT_QUOTES, 'UTF-8'); ?></p>
     <?php endif; ?>
   </main>
