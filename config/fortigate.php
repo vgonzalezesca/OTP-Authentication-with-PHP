@@ -49,6 +49,9 @@ function gesexCaptureFortiGateContext(string $stage = 'unknown'): void
     $_SESSION['fortigate_magic'] = $magic;
     $_SESSION['fortigate_post'] = isset($context['post']) ? trim($context['post']) : '';
     $_SESSION['fortigate_context'] = $context;
+    if (isset($requestContext['usermac']) && is_string($requestContext['usermac'])) {
+        $_SESSION['fortigate_usermac'] = substr($requestContext['usermac'], 0, 17);
+    }
     error_log('FortiGate context received=yes magic received=yes post received='
         . ($_SESSION['fortigate_post'] !== '' ? 'yes' : 'no') . ' stage=' . $stage);
 }

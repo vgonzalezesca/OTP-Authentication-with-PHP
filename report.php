@@ -33,7 +33,7 @@ if ($user !== '') {
     $where[] = 'email LIKE :user';
     $params[':user'] = '%' . $user . '%';
 }
-$sql = 'SELECT id, email, accessed_at FROM access_logs';
+$sql = 'SELECT id, email, device_mac, user_agent, accessed_at FROM access_logs';
 if ($where) {
     $sql .= ' WHERE ' . implode(' AND ', $where);
 }
@@ -48,12 +48,23 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     header('Content-Disposition: attachment; filename="reporte-accesos-gesex.csv"');
     $output = fopen('php://output', 'w');
     fputs($output, "\xEF\xBB\xBF");
-    fputcsv($output, ['ID', 'Correo electrónico', 'Fecha y hora de acceso']);
+    fputcsv($output, ['ID', 'Correo electrónico', 'Dispositivo', 'MAC', 'Fecha y hora de acceso']);
     foreach ($rows as $row) {
-        fputcsv($output, [$row['id'], $row['email'], $row['accessed_at']]);
+        fputcsv($output, [$row['id'], $row['email'], gesexDeviceLabel($row['user_agent']), $row['device_mac'], $row['accessed_at']]);
     }
     fclose($output);
     exit;
+}
+
+function gesexDeviceLabel(?string $ua): string {
+    if (!$ua) return 'Desconocido';
+    if (stripos($ua, 'iphone') !== false) return 'iPhone';
+    if (stripos($ua, 'ipad') !== false) return 'iPad';
+    if (stripos($ua, 'android') !== false) return 'Android';
+    if (stripos($ua, 'windows') !== false) return 'Windows';
+    if (stripos($ua, 'macintosh') !== false) return 'Mac';
+    if (stripos($ua, 'linux') !== false) return 'Linux';
+    return 'Otro';
 }
 
 function h(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
@@ -81,12 +92,12 @@ $query = http_build_query(['date' => $date, 'user' => $user, 'download' => 'csv'
     <p class="report-count"><?= count($rows) ?> acceso(s) encontrado(s).</p>
     <div class="report-table-wrap">
       <table>
-        <thead><tr><th>ID</th><th>Correo electrónico</th><th>Fecha y hora de acceso</th></tr></thead>
+        <thead><tr><th>ID</th><th>Correo electrónico</th><th>Dispositivo</th><th>MAC</th><th>Fecha y hora de acceso</th></tr></thead>
         <tbody>
         <?php foreach ($rows as $row): ?>
-          <tr><td><?= h((string) $row['id']) ?></td><td><?= h($row['email']) ?></td><td><?= h($row['accessed_at']) ?></td></tr>
+          <tr><td><?= h((string) $row['id']) ?></td><td><?= h($row['email']) ?></td><td><?= h(gesexDeviceLabel($row['user_agent'])) ?></td><td><?= h($row['device_mac'] ?: '-') ?></td><td><?= h($row['accessed_at']) ?></td></tr>
         <?php endforeach; ?>
-        <?php if (!$rows): ?><tr><td colspan="3">No hay accesos para los filtros seleccionados.</td></tr><?php endif; ?>
+        <?php if (!$rows): ?><tr><td colspan="5">No hay accesos para los filtros seleccionados.</td></tr><?php endif; ?>
         </tbody>
       </table>
     </div>

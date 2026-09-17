@@ -12,13 +12,16 @@ if (empty($_SESSION['otp_verified'])) {
 $email = strtolower(trim($_SESSION['otp_email'] ?? ''));
 $fortiGateHandoff = gesexFortiGateHandoff();
 
+$deviceMac = $_SESSION['fortigate_usermac'] ?? null;
+$userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
+
 if ($email !== '' && $conn instanceof PDO) {
     try {
         $stmt = $conn->prepare(
-            'INSERT INTO access_logs (user_id, email) '
-            . 'SELECT id, email FROM users WHERE LOWER(TRIM(email)) = :email LIMIT 1'
+            'INSERT INTO access_logs (user_id, email, device_mac, user_agent) '
+            . 'SELECT id, email, :mac, :ua FROM users WHERE LOWER(TRIM(email)) = :email LIMIT 1'
         );
-        $stmt->execute([':email' => $email]);
+        $stmt->execute([':email' => $email, ':mac' => $deviceMac, ':ua' => $userAgent]);
     } catch (PDOException $e) {
         error_log('No fue posible registrar el acceso OTP: ' . $e->getMessage());
     }
