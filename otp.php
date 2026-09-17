@@ -55,6 +55,8 @@ if (isset($_POST['send-email']) && $databaseAvailable) {
 
             $mail = new PHPMailer(true);
             $mail->isSMTP();
+            $mail->Timeout = 10;
+            $mail->SMTPKeepAlive = false;
             $mail->Host       = SMTP_HOST;
             $mail->SMTPAuth   = true;
             $mail->CharSet    = 'UTF-8';
@@ -69,7 +71,9 @@ if (isset($_POST['send-email']) && $databaseAvailable) {
             $mail->Subject = 'Codigo de acceso | Visitas GESEX';
             $mail->Body = 'Su codigo de acceso para la red Wi-Fi de visitas GESEX es: <strong>' . htmlspecialchars($otp, ENT_QUOTES, 'UTF-8') . '</strong><br><br>Este codigo expira en 5 minutos.';
             $mail->AltBody = 'Su codigo de acceso para la red Wi-Fi de visitas GESEX es: ' . $otp . '. Este codigo expira en 5 minutos.';
+            $t0 = microtime(true);
             $mail->send();
+            error_log('OTP smtp_send_ms=' . round((microtime(true) - $t0) * 1000));
             $_SESSION['otp_email'] = $email;
             $_SESSION['otp_hash'] = password_hash($otp, PASSWORD_DEFAULT);
             $_SESSION['otp_expires_at'] = $otpExpiresAt;
@@ -144,5 +148,21 @@ if (isset($_POST['verify-otp']) && $databaseAvailable) {
       </form>
     <?php endif; ?>
   </main>
+  <script>
+    document.querySelector('button[name="send-email"]')?.addEventListener('click', function() {
+        const btn = this;
+        setTimeout(function() {
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+        }, 0);
+    });
+    document.querySelector('button[name="verify-otp"]')?.addEventListener('click', function() {
+        const btn = this;
+        setTimeout(function() {
+            btn.disabled = true;
+            btn.textContent = 'Verificando...';
+        }, 0);
+    });
+  </script>
 </body>
 </html>
